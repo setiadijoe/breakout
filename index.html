@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#e9ece0">
+  <title>Breakout | Pocket Arcade</title>
+  <link rel="stylesheet" href="./style.css">
+  <script type="module" src="./js/main.js"></script>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="topline">
+      <a class="brand" href="#top" aria-label="Pocket Arcade home">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>POCKET ARCADE</span>
+      </a>
+      <div class="edition"><span>CLASSIC SERIES</span><span class="edition-number">03</span></div>
+    </header>
+
+    <main id="top">
+      <section class="game-layout" aria-label="Breakout arcade game">
+        <div class="game-column">
+          <div class="page-title">
+            <div>
+              <p class="eyebrow">BRICK BREAKER / 03</p>
+              <h1>BREAKOUT</h1>
+            </div>
+            <span class="title-rule" aria-hidden="true"></span>
+          </div>
+
+          <div class="console">
+            <div class="console-header console-label">
+              <span>LCD DISPLAY</span>
+              <span>MODE ARCADE</span>
+            </div>
+            <div class="screen">
+              <canvas class="game-canvas" id="game-canvas" width="960" height="600" role="img" aria-label="Papan Breakout. Gerakkan paddle dengan mouse, sentuh, atau tombol panah." aria-describedby="game-status"></canvas>
+              <output class="upgrade-status" id="upgrade-status" aria-live="polite" hidden></output>
+              <div class="screen-overlay" id="screen-overlay">
+                <strong id="overlay-title">SIAP?</strong>
+                <span id="overlay-message">KLIK MULAI ATAU TEKAN SPASI</span>
+              </div>
+            </div>
+            <div class="console-footer">
+              <span class="power-indicator"><i class="power-light" aria-hidden="true"></i>POWER</span>
+              <span>POCKET ARCADE</span>
+            </div>
+          </div>
+        </div>
+
+        <aside class="side-panel" aria-label="Score and game controls">
+          <div class="score-grid">
+            <div class="stat">
+              <span class="stat-label">SKOR</span>
+              <output class="stat-value" id="score">0000</output>
+            </div>
+            <div class="stat stat-small">
+              <span class="stat-label">NYAWA</span>
+              <output class="stat-value" id="lives">3</output>
+            </div>
+            <div class="stat stat-small level-stat">
+              <span class="stat-label">LEVEL</span>
+              <output class="stat-value" id="level">01</output>
+              <span class="stat-caption" id="loop-count">PUTARAN 1</span>
+            </div>
+          </div>
+
+          <div class="mobile-control-bar" aria-label="Kontrol permainan">
+            <div class="d-pad" role="group" aria-label="Tombol arah">
+              <button class="d-pad-button d-pad-up" type="button" data-action="start" aria-label="Mulai atau lanjut">▲</button>
+              <button class="d-pad-button d-pad-left" type="button" data-direction="-1" aria-label="Gerakkan paddle ke kiri">◀</button>
+              <span class="d-pad-center" aria-hidden="true"></span>
+              <button class="d-pad-button d-pad-right" type="button" data-direction="1" aria-label="Gerakkan paddle ke kanan">▶</button>
+              <button class="d-pad-button d-pad-down" type="button" data-action="pause" aria-label="Jeda permainan">▼</button>
+            </div>
+            <div class="game-controls">
+              <button id="start-button" class="game-button primary-button gamepad-start" type="button">MULAI</button>
+            </div>
+            <div class="action-buttons" role="group" aria-label="Tombol aksi">
+              <button class="action-button action-a" type="button" data-action="primary" aria-label="A: mulai atau lanjutkan; tahan untuk menembak saat upgrade aktif">A</button>
+              <button class="action-button action-b" type="button" data-action="pause" aria-label="B: jeda permainan">B</button>
+            </div>
+          </div>
+
+        </aside>
+      </section>
+      <p id="game-status" class="sr-only" role="status" aria-live="polite">Siap bermain.</p>
+    </main>
+
+    <footer class="bottomline">
+      <span>POCKET ARCADE</span>
+      <span>EST. 1988 / GAME 03</span>
+    </footer>
+  </div>
+</body>
+</html>
