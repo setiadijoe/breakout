@@ -1,6 +1,7 @@
 import { BreakoutGame } from "./game.js";
 import { BreakoutRenderer } from "./renderer.js";
 import { attachControls } from "./controls.js";
+import { BreakoutAudio } from "./audio.js";
 
 function requireElement(id) {
   const element = document.getElementById(id);
@@ -40,7 +41,8 @@ const API_BASE_URL = import.meta.env.DEV
   ? window.location.origin
   : import.meta.env.VITE_API_BASE_URL || "https://api-games.nunbun.sbs";
 
-const game = new BreakoutGame();
+const audio = new BreakoutAudio();
+const game = new BreakoutGame({ onSound: (type) => audio.play(type) });
 const renderer = new BreakoutRenderer(canvas);
 const pressedKeys = new Set();
 let previousFrame = 0;
@@ -232,6 +234,7 @@ window.addEventListener("keyup", (event) => pressedKeys.delete(event.code));
 attachControls(canvas, game, actions);
 
 function startGame() {
+  audio.unlock();
   if (game.state === "gameover") game.newGame();
   game.start();
   updateInterface();
@@ -283,8 +286,8 @@ function updateInterface() {
       statusMessage.textContent = "Permainan dijeda.";
     } else {
       overlayTitle.textContent = "SIAP?";
-      overlayMessage.textContent = "Klik MULAI atau tekan spasi";
-      statusMessage.textContent = "Siap bermain.";
+      overlayMessage.textContent = `Level ${game.level} siap. Klik MULAI atau tekan spasi untuk meluncurkan bola.`;
+      statusMessage.textContent = `Level ${game.level} siap. Tekan MULAI untuk meluncurkan bola.`;
     }
   }
   if (gameJustEnded && game.score > 0) openScoreSubmitDialog();

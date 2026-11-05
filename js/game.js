@@ -15,7 +15,6 @@ const UPGRADE_TYPES = ["wide", "shooter", "shield"];
 const UPGRADE_DROP_SPEED = 110;
 const SHOT_INTERVAL = 0.5;
 const SHOT_SPEED = 360;
-const SHOT_SIDE_SPEED = 100;
 const SHIELD_DURATION = 20;
 const LEVEL_LAYOUTS = new Map();
 
@@ -98,7 +97,8 @@ function getLevelPatterns(rows, columns) {
 }
 
 export class BreakoutGame {
-  constructor() {
+  constructor({ onSound } = {}) {
+    this.onSound = onSound;
     this.level = 1;
     this.loop = 1;
     this.speedMultiplier = 1;
@@ -114,7 +114,6 @@ export class BreakoutGame {
     this.projectiles = [];
     this.shotCooldown = 0;
     this.shooting = false;
-    this.nextShotSide = -1;
     this.resetBoard();
     this.resetBallAndPaddle();
   }
@@ -254,11 +253,13 @@ export class BreakoutGame {
     this.updateUpgradeEffects(dt);
     this.updateUpgradeDrops(dt);
     this.updateProjectiles(dt);
+    if (this.state !== "playing") return;
     const distanceScale = dt * 200;
     this.ball.x += this.ball.vx * distanceScale;
     this.ball.y += this.ball.vy * distanceScale;
     this.handlePaddleCollision();
     this.handleBrickCollision();
+    if (this.state !== "playing") return;
     this.handleWallCollision();
     this.keepBallSpeedInRange();
   }
@@ -317,16 +318,13 @@ export class BreakoutGame {
   }
 
   fireShots() {
-    const side = this.nextShotSide;
-    const x = this.paddle.x + this.paddle.width * (side < 0 ? 0.15 : 0.85);
     this.projectiles.push({
-      x: x + side * 2,
+      x: this.paddle.x + this.paddle.width / 2,
       y: this.paddle.y + this.paddle.height * 0.25,
-      vx: side * SHOT_SIDE_SPEED,
+      vx: 0,
       vy: -SHOT_SPEED,
       radius: 5
     });
-    this.nextShotSide *= -1;
   }
 
   activateUpgrade(type) {
@@ -340,7 +338,6 @@ export class BreakoutGame {
       this.upgradeTimer = SHIELD_DURATION;
     } else if (type === "shooter") {
       this.shotCooldown = 0;
-      this.nextShotSide = -1;
     }
   }
 
@@ -375,6 +372,7 @@ export class BreakoutGame {
       ball.x >= paddle.x + sideInset - ball.radius &&
       ball.x <= paddle.x + paddle.width - sideInset + ball.radius
     ) {
+      this.onSound?.("paddle");
       ball.y = paddle.y - ball.radius;
       const incomingSpeed = Math.hypot(ball.vx, ball.vy);
       const incomingAngle = Math.atan2(Math.abs(ball.vx), Math.abs(ball.vy));
@@ -428,6 +426,7 @@ export class BreakoutGame {
     }
     if (!hit) return;
 
+    this.onSound?.("brick");
     this.destroyBrick(hit);
     if (overlapX < overlapY) {
       ball.vx *= -1;
@@ -491,8 +490,10 @@ export class BreakoutGame {
     } else {
       this.level += 1;
     }
+    this.setShooting(false);
     this.resetBoard();
-    this.clampBallVelocity();
+    this.state = "ready";
+    this.resetBallAndPaddle();
   }
 
   clampBallVelocity() {
