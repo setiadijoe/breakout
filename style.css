@@ -122,6 +122,72 @@ a:focus-visible {
   margin: 0 0 23px;
 }
 
+.top-score-panel {
+  display: grid;
+  flex: 0 1 190px;
+  gap: 4px;
+  min-width: 130px;
+  margin-left: auto;
+  padding-left: 10px;
+  border-left: 1px solid var(--line);
+}
+
+.top-score-panel .panel-heading {
+  gap: 4px;
+  font-size: 9px;
+}
+
+.top-score-panel .panel-heading h2 {
+  margin: 0;
+  font: inherit;
+}
+
+.top-score-panel .panel-heading span {
+  max-width: 55%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.top-score-value {
+  overflow: hidden;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.top-score-message {
+  margin: 0;
+  color: #545b4d;
+  font-size: 9px;
+  overflow-wrap: anywhere;
+}
+
+.score-list-button,
+.dialog-close-button {
+  min-height: 30px;
+  padding: 5px 7px;
+  border: 1px solid var(--ink);
+  color: var(--ink);
+  background: transparent;
+  font: inherit;
+  font-size: 9px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.score-list-button:hover:not(:disabled),
+.dialog-close-button:hover {
+  color: var(--paper);
+  background: var(--ink);
+}
+
+.score-list-button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
 .page-title h1 {
   margin: 0;
   font-size: clamp(38px, 8vw, 58px);
@@ -213,6 +279,31 @@ a:focus-visible {
   height: 100%;
 }
 
+.screen-widgets {
+  position: absolute;
+  z-index: 2;
+  inset: 9px 11px auto auto;
+  pointer-events: none;
+}
+
+.screen-stat {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  text-align: right;
+}
+
+.screen-stat .stat-label {
+  margin: 0;
+  color: #4c6141;
+  font-size: 9px;
+}
+
+.screen-stat .stat-value {
+  color: var(--lcd-dark);
+  font-size: clamp(14px, 3vw, 20px);
+}
+
 .screen-overlay {
   position: absolute;
   z-index: 2;
@@ -271,7 +362,7 @@ a:focus-visible {
 
 .score-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: end;
   border-top: 2px solid var(--ink);
   border-bottom: 1px solid var(--line);
@@ -315,6 +406,181 @@ a:focus-visible {
   font-size: 7px;
   font-weight: 700;
   white-space: nowrap;
+}
+
+.score-submit-dialog,
+.high-scores-dialog {
+  width: min(420px, calc(100% - 32px));
+  max-height: min(80vh, 640px);
+  padding: 0;
+  border: 2px solid var(--ink);
+  color: var(--ink);
+  background: var(--paper);
+  box-shadow: 7px 7px 0 var(--ink);
+}
+
+.score-submit-dialog::backdrop,
+.high-scores-dialog::backdrop {
+  background: rgba(32, 37, 29, 0.62);
+}
+
+.score-submit-form,
+.high-scores-content {
+  display: grid;
+  gap: 12px;
+  padding: 24px;
+}
+
+.score-submit-form .eyebrow,
+.score-submit-form h2,
+.score-submit-value {
+  margin: 0;
+}
+
+.score-submit-form h2,
+.high-scores-content h2 {
+  font-size: 20px;
+}
+
+.score-submit-value,
+.score-submit-form label {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.score-submit-value output {
+  display: block;
+  margin-top: 5px;
+  color: var(--ink);
+  font-size: 32px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.score-submit-form input {
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 10px;
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  color: var(--ink);
+  background: #fffaf1;
+  font: inherit;
+}
+
+.score-submit-form input:focus-visible {
+  outline: 3px solid var(--tomato);
+  outline-offset: 2px;
+}
+
+.score-submit-error {
+  margin: 0;
+  color: #a12e22;
+  font-size: 11px;
+}
+
+.score-submit-error[hidden] {
+  display: none;
+}
+
+.score-submit-actions,
+.high-scores-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+}
+
+.score-submit-cancel,
+.score-submit-save {
+  min-height: 38px;
+  padding: 8px 11px;
+  border: 1px solid var(--ink);
+  background: transparent;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.score-submit-save {
+  color: #fffaf1;
+  background: var(--tomato);
+}
+
+.score-submit-cancel:hover,
+.score-submit-save:hover {
+  transform: translateY(-1px);
+}
+
+.score-submit-cancel:disabled,
+.score-submit-save:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+.high-scores-content {
+  gap: 16px;
+}
+
+.high-scores-content .panel-heading {
+  gap: 8px;
+  font-size: 11px;
+}
+
+.high-scores-content .panel-heading h2 {
+  margin: 0;
+  font: inherit;
+}
+
+.high-scores-content .panel-heading span {
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.high-scores-list {
+  display: grid;
+  gap: 7px;
+  max-height: 50vh;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.high-scores-list li {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  gap: 10px;
+  padding: 9px 5px;
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+}
+
+.high-score-rank,
+.high-score-points {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.high-score-rank,
+.high-scores-message {
+  color: var(--muted);
+}
+
+.high-score-player {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.high-scores-message {
+  display: block !important;
+}
+
+.high-scores-actions .score-list-button {
+  min-height: 38px;
+  padding: 8px 10px;
 }
 
 .game-controls {
@@ -426,12 +692,19 @@ a:focus-visible {
   }
 
   .page-title {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
     grid-row-start: 1;
     grid-row-end: 2;
-    grid-column: 1;
+    grid-column: 1 / -1;
     align-self: start;
-    gap: 0;
+    gap: 8px;
     margin: 0;
+  }
+
+  .page-title > div {
+    min-width: 0;
   }
 
   .page-title h1 {
@@ -447,12 +720,33 @@ a:focus-visible {
     display: none;
   }
 
+  .top-score-panel {
+    min-width: 0;
+    margin-left: 0;
+    padding-left: 7px;
+  }
+
+  .top-score-panel .panel-heading {
+    font-size: 8px;
+  }
+
+  .top-score-value {
+    font-size: clamp(16px, 5vw, 20px);
+  }
+
+  .top-score-panel .score-list-button {
+    min-height: 26px;
+    padding: 4px 6px;
+    font-size: 8px;
+  }
+
   .score-grid {
     grid-row-start: 1;
     grid-row-end: 2;
-    grid-column: 2;
+    grid-row: 2;
+    grid-column: 1 / -1;
     align-self: start;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .stat {
@@ -477,8 +771,7 @@ a:focus-visible {
   }
 
   .console {
-    grid-row-start: 2;
-    grid-row-end: 3;
+    grid-row: 3;
     grid-column: 1 / -1;
   }
 
@@ -637,6 +930,14 @@ a:focus-visible {
 
   .console {
     padding: 10px;
+  }
+
+  .top-score-panel .panel-heading span {
+    max-width: 48%;
+  }
+
+  .screen-widgets {
+    inset: 7px 8px auto auto;
   }
 
   .game-controls {

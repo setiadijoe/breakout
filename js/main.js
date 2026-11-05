@@ -19,12 +19,201 @@ const overlayMessage = requireElement("overlay-message");
 const upgradeStatus = requireElement("upgrade-status");
 const statusMessage = requireElement("game-status");
 const startButton = requireElement("start-button");
+const topScoreName = requireElement("top-score-name");
+const topScoreValue = requireElement("top-score-value");
+const topScoreMessage = requireElement("top-score-message");
+const viewHighScoresButton = requireElement("view-high-scores");
+const highScoresDialog = requireElement("high-scores-dialog");
+const highScoresList = requireElement("high-scores-list");
+const loadMoreScoresButton = requireElement("load-more-scores");
+const closeHighScoresButton = requireElement("close-high-scores");
+const scoreSubmitDialog = requireElement("score-submit-dialog");
+const scoreSubmitForm = requireElement("score-submit-form");
+const playerNameInput = requireElement("player-name");
+const gameOverScore = requireElement("game-over-score");
+const scoreSubmitError = requireElement("score-submit-error");
+const saveScoreButton = requireElement("save-score");
+const cancelScoreSubmitButton = requireElement("cancel-score-submit");
+
+const BREAKOUT_GAME_ID = import.meta.env.VITE_TITLE_GAME_ID;
+const API_BASE_URL = import.meta.env.DEV
+  ? window.location.origin
+  : import.meta.env.VITE_API_BASE_URL || "https://api-games.nunbun.sbs";
 
 const game = new BreakoutGame();
 const renderer = new BreakoutRenderer(canvas);
 const pressedKeys = new Set();
 let previousFrame = 0;
 let lastInterfaceState = "";
+let previousGameState = game.state;
+let highScoresCursor = "";
+let highScoresLoaded = 0;
+let highScoresLoading = false;
+let highScoresHasMore = true;
+
+function makeScoresUrl(limit, cursor = "") {
+  if (!BREAKOUT_GAME_ID) throw new Error("Set VITE_TITLE_GAME_ID in .env");
+  const url = new URL("/api/scores", API_BASE_URL);
+  url.searchParams.set("title_game_id", BREAKOUT_GAME_ID);
+  url.searchParams.set("limit", String(limit));
+  if (cursor) url.searchParams.set("cursor", cursor);
+  return url;
+}
+
+async function fetchScores(limit, cursor = "") {
+  const response = await fetch(makeScoresUrl(limit, cursor));
+  if (!response.ok) throw new Error(`Tidak dapat memuat skor (${response.status})`);
+  const page = await response.json();
+  if (
+    !page ||
+    !Array.isArray(page.scores) ||
+    typeof page.nextCursor !== "string" ||
+    page.scores.some((entry) =>
+      !entry || typeof entry.name !== "string" || !Number.isSafeInteger(entry.score)
+    )
+  ) {
+    throw new Error("Server skor mengembalikan data yang tidak valid");
+  }
+  return page;
+}
+
+async function loadTopScore() {
+  try {
+    const page = await fetchScores(1);
+    topScoreMessage.textContent = "";
+    const [topScore] = page.scores;
+    if (!topScore) {
+      topScoreName.textContent = "NO RECORDS";
+      topScoreValue.textContent = "------";
+      return;
+    }
+    topScoreName.textContent = topScore.name;
+    topScoreValue.textContent = String(topScore.score).padStart(6, "0");
+  } catch (error) {
+    console.error("Tidak dapat memuat skor tertinggi", error);
+    topScoreName.textContent = "UNAVAILABLE";
+    topScoreValue.textContent = "------";
+    topScoreMessage.textContent = `Skor tidak dapat dimuat: ${error.message}`;
+  }
+}
+
+function appendHighScores(scores) {
+  for (const [index, entry] of scores.entries()) {
+    const row = document.createElement("li");
+    const rank = document.createElement("span");
+    const name = document.createElement("span");
+    const value = document.createElement("span");
+    rank.className = "high-score-rank";
+    name.className = "high-score-player";
+    value.className = "high-score-points";
+    rank.textContent = `${String(highScoresLoaded + index + 1).padStart(2, "0")}.`;
+    name.textContent = entry.name;
+    value.textContent = String(entry.score).padStart(6, "0");
+    row.append(rank, name, value);
+    highScoresList.append(row);
+  }
+  highScoresLoaded += scores.length;
+}
+
+async function loadHighScores(reset = false) {
+  if (highScoresLoading || (!reset && !highScoresHasMore)) return;
+  if (reset) {
+    highScoresCursor = "";
+    highScoresLoaded = 0;
+    highScoresHasMore = true;
+    highScoresList.replaceChildren();
+    const message = document.createElement("li");
+    message.className = "high-scores-message";
+    message.textContent = "Memuat skor...";
+    highScoresList.append(message);
+  }
+
+  highScoresLoading = true;
+  loadMoreScoresButton.disabled = true;
+  try {
+    const page = await fetchScores(10, highScoresCursor);
+    if (highScoresLoaded === 0) highScoresList.replaceChildren();
+    appendHighScores(page.scores);
+    if (highScoresLoaded === 0) {
+      const message = document.createElement("li");
+      message.className = "high-scores-message";
+      message.textContent = "NO RECORDS";
+      highScoresList.append(message);
+    }
+    highScoresCursor = page.nextCursor;
+    highScoresHasMore = Boolean(page.nextCursor);
+  } catch (error) {
+    console.error("Tidak dapat memuat leaderboard", error);
+    if (highScoresLoaded === 0) {
+      highScoresList.replaceChildren();
+      highScoresHasMore = false;
+    }
+    const message = document.createElement("li");
+    message.className = "high-scores-message";
+    message.textContent = highScoresLoaded === 0
+      ? `Skor tidak dapat dimuat: ${error.message}`
+      : "Tidak dapat memuat skor berikutnya.";
+    highScoresList.append(message);
+  } finally {
+    highScoresLoading = false;
+    loadMoreScoresButton.disabled = !highScoresHasMore;
+    loadMoreScoresButton.hidden = !highScoresHasMore;
+  }
+}
+
+function openScoreSubmitDialog() {
+  scoreSubmitForm.reset();
+  gameOverScore.value = String(game.score).padStart(6, "0");
+  gameOverScore.textContent = String(game.score).padStart(6, "0");
+  playerNameInput.setCustomValidity("");
+  scoreSubmitError.hidden = true;
+  scoreSubmitError.textContent = "";
+  scoreSubmitDialog.showModal();
+  playerNameInput.focus();
+}
+
+async function submitGameOverScore(event) {
+  event.preventDefault();
+  const name = playerNameInput.value.trim();
+  if (!name || name.length > 30) {
+    playerNameInput.setCustomValidity("Nama harus terdiri dari 1 sampai 30 karakter.");
+    playerNameInput.reportValidity();
+    return;
+  }
+
+  playerNameInput.setCustomValidity("");
+  saveScoreButton.disabled = true;
+  cancelScoreSubmitButton.disabled = true;
+  scoreSubmitError.hidden = true;
+  try {
+    if (!BREAKOUT_GAME_ID) throw new Error("Set VITE_TITLE_GAME_ID di .env");
+    const response = await fetch(new URL("/api/scores", API_BASE_URL), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, score: game.score, game_id: BREAKOUT_GAME_ID })
+    });
+    const result = await response.json().catch(() => null);
+    if (!response.ok) {
+      throw new Error(
+        result && typeof result.error === "string"
+          ? result.error
+          : `Tidak dapat menyimpan skor (${response.status})`
+      );
+    }
+
+    statusMessage.textContent = `Skor ${game.score} disimpan untuk ${
+      result && typeof result.name === "string" ? result.name : name
+    }.`;
+    scoreSubmitDialog.close();
+    void loadTopScore();
+  } catch (error) {
+    scoreSubmitError.textContent = `Skor tidak dapat disimpan: ${error.message}`;
+    scoreSubmitError.hidden = false;
+  } finally {
+    saveScoreButton.disabled = false;
+    cancelScoreSubmitButton.disabled = false;
+  }
+}
 
 const actions = {
   toggle: toggleGame,
@@ -62,6 +251,8 @@ function updateInterface() {
   const interfaceState = `${game.state}:${game.score}:${game.lives}:${game.level}:${game.loop}:${game.activeUpgrade}:${Math.ceil(game.upgradeTimer)}`;
   if (interfaceState === lastInterfaceState) return;
   lastInterfaceState = interfaceState;
+  const gameJustEnded = game.state === "gameover" && previousGameState !== "gameover";
+  previousGameState = game.state;
   scoreOutput.value = String(game.score).padStart(4, "0");
   scoreOutput.textContent = String(game.score).padStart(4, "0");
   livesOutput.value = String(game.lives);
@@ -96,6 +287,7 @@ function updateInterface() {
       statusMessage.textContent = "Siap bermain.";
     }
   }
+  if (gameJustEnded && game.score > 0) openScoreSubmitDialog();
 }
 
 function frame(timestamp) {
@@ -111,10 +303,22 @@ startButton.addEventListener("click", () => {
   if (game.state === "playing") pauseGame();
   else startGame();
 });
+viewHighScoresButton.addEventListener("click", () => {
+  highScoresDialog.showModal();
+  void loadHighScores(true);
+});
+loadMoreScoresButton.addEventListener("click", () => void loadHighScores());
+closeHighScoresButton.addEventListener("click", () => highScoresDialog.close());
+scoreSubmitForm.addEventListener("submit", (event) => {
+  void submitGameOverScore(event);
+});
+playerNameInput.addEventListener("input", () => playerNameInput.setCustomValidity(""));
+cancelScoreSubmitButton.addEventListener("click", () => scoreSubmitDialog.close());
 window.addEventListener("resize", () => {
   renderer.resize();
   renderer.draw(game);
 });
 
 updateInterface();
+void loadTopScore();
 window.requestAnimationFrame(frame);

@@ -27,6 +27,15 @@
               <h1>BREAKOUT</h1>
             </div>
             <span class="title-rule" aria-hidden="true"></span>
+            <section class="top-score-panel" aria-labelledby="top-score-title">
+              <div class="panel-heading">
+                <h2 id="top-score-title">TOP SCORE</h2>
+                <span id="top-score-name">LOADING</span>
+              </div>
+              <output class="top-score-value" id="top-score-value" aria-live="polite">------</output>
+              <p class="top-score-message" id="top-score-message" role="status"></p>
+              <button class="score-list-button" id="view-high-scores" type="button">VIEW SCORES</button>
+            </section>
           </div>
 
           <div class="console">
@@ -36,6 +45,12 @@
             </div>
             <div class="screen">
               <canvas class="game-canvas" id="game-canvas" width="960" height="600" role="img" aria-label="Papan Breakout. Gerakkan paddle dengan mouse, sentuh, atau tombol panah." aria-describedby="game-status"></canvas>
+              <div class="screen-widgets" aria-label="Skor saat ini">
+                <section class="screen-stat" aria-label="Skor">
+                  <span class="stat-label">SKOR</span>
+                  <output class="stat-value" id="score">0000</output>
+                </section>
+              </div>
               <output class="upgrade-status" id="upgrade-status" aria-live="polite" hidden></output>
               <div class="screen-overlay" id="screen-overlay">
                 <strong id="overlay-title">SIAP?</strong>
@@ -51,10 +66,6 @@
 
         <aside class="side-panel" aria-label="Score and game controls">
           <div class="score-grid">
-            <div class="stat">
-              <span class="stat-label">SKOR</span>
-              <output class="stat-value" id="score">0000</output>
-            </div>
             <div class="stat stat-small">
               <span class="stat-label">NYAWA</span>
               <output class="stat-value" id="lives">3</output>
@@ -87,6 +98,40 @@
       </section>
       <p id="game-status" class="sr-only" role="status" aria-live="polite">Siap bermain.</p>
     </main>
+
+    <dialog class="score-submit-dialog" id="score-submit-dialog" aria-labelledby="score-submit-title">
+      <form class="score-submit-form" id="score-submit-form">
+        <p class="eyebrow">GAME OVER</p>
+        <h2 id="score-submit-title">SIMPAN SKOR?</h2>
+        <p class="score-submit-value">
+          SKOR AKHIR
+          <output id="game-over-score">0000</output>
+        </p>
+        <label for="player-name">NAMA PEMAIN</label>
+        <input id="player-name" name="name" type="text" maxlength="30" autocomplete="nickname" required>
+        <p class="score-submit-error" id="score-submit-error" role="alert" hidden></p>
+        <div class="score-submit-actions">
+          <button class="score-submit-cancel" id="cancel-score-submit" type="button">BATAL</button>
+          <button class="score-submit-save" id="save-score" type="submit">SIMPAN</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog class="high-scores-dialog" id="high-scores-dialog" aria-labelledby="high-scores-title">
+      <div class="high-scores-content">
+        <div class="panel-heading">
+          <h2 id="high-scores-title">BREAKOUT HIGH SCORES</h2>
+          <span>TOP SCORES</span>
+        </div>
+        <ol class="high-scores-list" id="high-scores-list" aria-live="polite">
+          <li class="high-scores-message">Memuat skor...</li>
+        </ol>
+        <div class="high-scores-actions">
+          <button class="score-list-button" id="load-more-scores" type="button" disabled>LOAD MORE</button>
+          <button class="dialog-close-button" id="close-high-scores" type="button">CLOSE</button>
+        </div>
+      </div>
+    </dialog>
 
     <footer class="bottomline">
       <span>POCKET ARCADE</span>
