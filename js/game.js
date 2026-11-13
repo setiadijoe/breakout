@@ -97,8 +97,9 @@ function getLevelPatterns(rows, columns) {
 }
 
 export class BreakoutGame {
-  constructor({ onSound } = {}) {
+  constructor({ onSound, onLevelComplete } = {}) {
     this.onSound = onSound;
+    this.onLevelComplete = onLevelComplete;
     this.level = 1;
     this.loop = 1;
     this.speedMultiplier = 1;
@@ -481,6 +482,7 @@ export class BreakoutGame {
   }
 
   advanceLevel() {
+    this.onLevelComplete?.();
     if (this.level === LEVEL_COUNT) {
       this.level = 1;
       this.loop += 1;

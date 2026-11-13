@@ -42,7 +42,10 @@ const API_BASE_URL = import.meta.env.DEV
   : import.meta.env.VITE_API_BASE_URL || "https://api-games.nunbun.sbs";
 
 const audio = new BreakoutAudio();
-const game = new BreakoutGame({ onSound: (type) => audio.play(type) });
+const game = new BreakoutGame({
+  onSound: (type) => audio.play(type),
+  onLevelComplete: () => audio.playLevelComplete()
+});
 const renderer = new BreakoutRenderer(canvas);
 const pressedKeys = new Set();
 let previousFrame = 0;
@@ -256,6 +259,7 @@ function updateInterface() {
   lastInterfaceState = interfaceState;
   const gameJustEnded = game.state === "gameover" && previousGameState !== "gameover";
   previousGameState = game.state;
+  if (gameJustEnded) audio.playGameOver();
   scoreOutput.value = String(game.score).padStart(4, "0");
   scoreOutput.textContent = String(game.score).padStart(4, "0");
   livesOutput.value = String(game.lives);
