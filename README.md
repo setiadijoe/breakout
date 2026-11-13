@@ -12,8 +12,7 @@ npm install
 npm run dev
 ```
 
-During development, Vite proxies `/api` requests to `VITE_API_BASE_URL`
-(default `https://api-games.nunbun.sbs`). To submit scores locally, use a local
+During development, Vite proxies `/api`. To submit scores locally, use a local
 game server at `http://localhost:3000` because production accepts score writes
 only from approved game origins. Configure `VITE_API_BASE_URL` and
 `VITE_TITLE_GAME_ID` in the production deployment environment. Vite variables
